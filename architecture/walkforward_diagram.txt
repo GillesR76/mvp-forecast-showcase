@@ -1,0 +1,20 @@
+Timeline (dates croissantes)  --->
+
+train_1          test_1
+|-----------------|----|
+t0                t1   t2
+
+        train_2           test_2
+        |------------------|----|
+        t1                 t3   t4
+
+                train_3           test_3
+                |------------------|----|
+                t2                 t5   t6
+
+Principe :
+- chaque fenêtre d'entraînement (train_k) utilise uniquement le passé
+- chaque fenêtre de test (test_k) vient immédiatement après ou avec un "gap"
+- les métriques sont calculées sur chaque test_k
+- un agrégat global (ex. MAE moyen) mesure les performances
+- la variance inter-splits renseigne sur la stabilité temporelle

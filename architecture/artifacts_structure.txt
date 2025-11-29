@@ -1,0 +1,16 @@
+artifacts/
+└── <run_id>/                          # un dossier par exécution du pipeline
+    ├── summary.csv                    # métriques globales (agrégées)
+    ├── details.csv                    # métriques par split / horizon
+    ├── predictions.csv                # prédictions alignées sur la série
+    ├── model_card.json                # description structurée du modèle
+    ├── run_info.json                  # métadonnées du run (config, durée...)
+    └── figures/                       # visuels de restitution
+        ├── forecast_last_split.png
+        ├── errors_by_split.png
+        └── comparaison_baseline.png
+
+Remarques :
+- <run_id> peut être un timestamp ou un identifiant lisible (ex: "2025-01-15_1030").
+- La structure met l'accent sur la traçabilité et la reproductibilité.
+- Le contenu exact reste propre au moteur sous-jacent (non exposé ici).

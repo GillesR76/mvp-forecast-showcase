@@ -91,31 +91,46 @@ Il ne contient pas le code complet du moteur (propriété intellectuelle).
 
 ---
 
-# 2. Architecture conceptuelle du pipeline
+# 2. Pipeline détaillé (vue interne simplifiée)
 
+Le pipeline de prévision suit une chaîne d’étapes contrôlées :
 
-Le pipeline de prévision repose sur quatre briques principales :
-- **1. Préparation des données**
-    - Contrôles qualité
-    - Normalisation des dates
-    - Création des variables retardées (lags) et exogènes
-- **2. AutoML-lite**
-    - Plusieurs modèles sont évalués
-    - Sélection par validation temporelle
-    - Conservation du candidat le plus robuste
-- **3. Validation walk-forward**
-    - Découpages temporels successifs
-    - Entraînement + prédiction sur chaque split
-    - Mesure de stabilité et cohérence temporelle
-- **4. Export des artefacts**
-    - Métriques globales et détaillées
-    - Modèle gagnant sérialisé
-    - “model card” décrivant l’ensemble des paramètres
-    - Visualisations pour interprétation métier
-
-Schéma pipeline :
-
-<img src="architecture/pipeline.png" alt="Photo" width="400">
+```
+(1) [Données brutes]
+      - vérification structurelle (dates, cible, cohérence)
+      - harmonisation des colonnes temporelles
+      ↓
+(2) Préparation & features
+      - validation du dataset
+      - création de variables explicatives (lags, calendrier…)
+      - intégration éventuelle de signaux externes
+      - constitution d’un dataset supervisé
+      ↓
+(3) Sélection du modèle (AutoML-lite)
+      - préparation d’un espace de modèles simples et robustes
+      - validation temporelle pour évaluer stabilité et cohérence
+      - choix automatique du candidat le plus fiable
+      ↓
+(4) Walk-forward
+      - découpages chronologiques successifs
+      - entraînement + prédiction sur chaque segment
+      - métriques globales et par période
+      ↓
+(5) Export artefacts
+      - tableaux de synthèse (CSV)
+      - visualisations (PNG)
+      - contexte d’exécution
+      - modèle exporté + fiche modèle (model card)
+      ↓
+(6) Inférence batch
+      - reproduction cohérente du traitement appliqué en entraînement
+      - génération d’un fichier predictions.csv
+      ↓
+(7) Interface UI
+      - visualisation des résultats
+      - mode démo et mode laboratoire
+      - exécution sur CSV uploadés
+```
 
 ---
 
@@ -130,7 +145,7 @@ Schéma pipeline :
   - Visualisations
 - Interface métier (Streamlit) pour permettre à un utilisateur non technique de : 
   - Charger un fichier CSV
-  - -Lancer une évaluation
+  - Lancer une évaluation
   - Visualiser les prédictions et métriques
 - Traçabilité: chaque run est documenté (config, durée, environnement)
 - Mode démonstrateur : un script end-to-end permet de générer un run complet et ses artefacts

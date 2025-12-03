@@ -452,8 +452,7 @@ La Phase 2 visera à transformer ce moteur en une solution déployable en produc
 
 # 11. Pour aller plus loin
 
-- Article Medium : _“Construire un moteur de prévision robuste pour PME — Retour d’expérience”_  
-    _(à insérer)_
+- [Article Medium](https://medium.com/@gillouridoo/de-lauto-formation-%C3%A0-un-mvp-industrialisable-comment-j-ai-construit-un-moteur-de-pr%C3%A9vision-ia-6eb1fc4164e6?postPublishedType=repub) : _“De l’auto-formation à un MVP industrialisable: comment j’ai construit un moteur de prévision IA complet”_
 - [LinkedIn](https://www.linkedin.com/in/gilles-richard-710409168/)
 
 Pour toute question ou discussion, n’hésitez pas à me contacter

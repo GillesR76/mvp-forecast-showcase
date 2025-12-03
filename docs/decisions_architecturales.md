@@ -1,74 +1,98 @@
+# Décisions Architecturales — Démonstrateur Prédictif PME
 
-## Décisions Architecturales — Démonstrateur Prédictif PME
+Ce document présente les grands principes d’architecture qui ont guidé la construction du moteur de prévision utilisé dans ce démonstrateur.  
+Aucun détail interne du MVP réel n’est exposé: seuls les choix conceptuels sont documentés.
 
-Ce document décrit les grands choix qui ont guidé la construction du moteur de prévision présenté dans ce repo vitrine. Il ne contient aucune logique interne du MVP réel, uniquement les principes.
 
-## 1. Walk-forward comme validation centrale
 
-#### Pourquoi ce choix ?
-- Les données PME sont temporelles.
-- Les ruptures sont fréquentes (jours fériés, saison, promos).
-- Le walk-forward est la méthode la plus robuste pour mesurer la stabilité.
-#### Alternatives envisagées
-- Cross-validation classique → non pertinente pour séries temporelles.
-- Train_test_split simple → insuffisamment représentatif.
+## 1. Validation temporelle: walk-forward strict
 
-## 2. AutoML-lite plutôt qu’AutoML complet
+**Raison du choix**
+- Les données PME sont temporelles et sujettes aux ruptures (saisonnalité, promotions, fériés)
+- Le walk-forward est la méthode la plus fiable pour mesurer la stabilité d’un modèle dans le temps
+- Il évite les fuites temporelles grâce au découpage chronologique et au gap
 
-#### Pourquoi ?
-- Transparence indispensable pour un contexte métier
-- Faible coût calculatoire
-- Facilité d’audit et d’explication
-- Sélection de modèles simples mais robustes (Ridge, Naïve…)
-#### Approche retenue
-- tests multi-modèles
-- scoring MAE
-- tie-breaker stabilité (variance inter-splits)
+**Alternatives non retenues**
+- Cross-validation classique → leakage assuré
+- Train_test_split simple → trop éloigné des conditions réelles d’utilisation
 
-## 3. Artefacts normalisés
 
-#### Pourquoi ?
-- Reproductibilité
-- Auditabilité
-- Documentation automatique
-- Préparation à la Phase 2 (API + monitoring)
-#### Artefacts choisis (conceptuellement)
-- résumé global
-- détails par split
-- “model card”
-- visualisations clé
-- configuration du run
 
-## 4. Séparation claire : moteur → interface
+## 2. AutoML-lite (plutôt qu’AutoML complet)
 
-#### Objectif
-Permettre :
-- un moteur réutilisable dans n’importe quel environnement,
-- une interface Streamlit simple,
-- une API future (FastAPI),
-- des scripts automatiques (batch).
+**Motivation**
+- Transparence indispensable dans un contexte PME
+- Coût calculatoire faible
+- Facilité d’audit, reproduction et explication
+- Modèles simples mais robustes (Ridge, baselines)
 
-Le moteur ne dépend d’aucune UI.
+**Approche retenue**
+- Tests multi-modèles
+- Scoring principal: MASE (référence à une baseline naïve)
+- Tie-breakers: MAE, RMSE, stabilité inter-splits
+- Sélection automatique du candidat le plus fiable
+
+
+
+## 3. Artefacts normalisés et reproductibles
+
+**Objectifs**
+- Rejouer un run à l’identique
+- Comprendre précisément ce qui a été évalué
+- Préparer la Phase 2 (monitoring, audit, API)
+
+**Artefacts (conceptuels)**
+- Summary global
+- Détails par split
+- Model card (hyperparamètres, features, métriques, contexte)
+- Run info (hash dataset, configuration, versions)
+- Visualisations clés
+
+
+
+## 4. Séparation claire des couches: moteur → CLI → interface
+
+**Raison**
+- Le moteur doit être réutilisable dans n’importe quel environnement:
+  - scripts batch
+  - CLI Typer
+  - API future (FastAPI)
+  - interface Streamlit
+  - orchestrateurs externes (Airflow, CRON, etc.)
+
+**Principes**
+- Le moteur ne dépend d’aucune UI
+- La CLI n’ajoute aucune logique métier: elle orchestre uniquement
+- L’interface est une couche "exposition métier" sans calcul interne
+
+
 
 ## 5. Simplicité des modèles (Phase 1)
 
-#### Pourquoi pas de deep learning ou modèles complexes ?
-
+**Pourquoi ?**
 - Historique limité dans les PME
-- Besoin d’interprétation
-- Notion de robustesse prioritaire
-- Optimisation de la maintenance du pipeline
+- Besoin d’explicabilité forte
+- Robustesse prioritaire
+- Maintenance et intégration facilitée
 
-Des extensions plus complexes sont prévues Phase 2
+**Conséquence**
+- Ridge, baselines, RandomForest
+- Pas de deep learning en Phase 1
+- Extension progressive prévue en Phase 2
 
-## 6. Préparation à une API future
 
-Le démonstrateur est pensé pour évoluer vers :
-- un endpoint `/predict`
-- un monitoring du drift
-- une gestion multi-horizon
-- un historique de runs
-- une orchestration planifiée
 
-Les choix Phase 1 préparent déjà ce futur.
+## 6. Préparation à l’industrialisation (Phase 2)
+
+Le design Phase 1 prépare déjà:
+- Un endpoint `/predict` (API)
+- Une prévision multi-horizon (récursif)
+- Un monitoring du drift
+- Des runs historisés et comparables
+- Une gestion multi-séries
+- Une intégration exogène enrichie (météo, calendrier, business)
+- Une orchestration planifiée
+
+Ces évolutions s’appuient sur les choix fondamentaux de reproductibilité et modularité réalisés en Phase 1.
+
 
